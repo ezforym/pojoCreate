@@ -161,7 +161,7 @@ public class PojoInsert {
 			fin = fin.replaceFirst(fin.substring(0, 1), fin.substring(0, 1).toUpperCase());
 		}
 		String fileName = dirName + "/" + fin + "." + func;
-		System.out.println(PojoInsert.createFile(fileName));
+		System.out.println(PojoInsert.createFile(change(fileName)));
 		String xxxxx = "";
 		if (func.equals("php")) {
 			xxxxx = huoquString(pojo);
@@ -187,20 +187,20 @@ public class PojoInsert {
 				math1 = 1;
 			}
 		}
-		str = str + "public class " + pojo.getTname().replaceFirst(pojo.getTname().substring(0, 1),
-				pojo.getTname().substring(0, 1).toUpperCase()) + "{\n";
+		str = str + "public class " + change(pojo.getTname().replaceFirst(pojo.getTname().substring(0, 1),
+				pojo.getTname().substring(0, 1).toUpperCase())) + "{\n";
 		for (int i = 0; i < pojo.getClu().size(); i++) {
-			str = str + "private " + getType(pojo.getClu().get(i).getType()) + " " + pojo.getClu().get(i).getTname()
-					+ ";\n";
+			str = str + "private " + getType(pojo.getClu().get(i).getType()) + " "
+					+ change(pojo.getClu().get(i).getTname()) + ";\n";
 		}
 		for (int i = 0; i < pojo.getClu().size(); i++) {
-			String tn = pojo.getClu().get(i).getTname();
+			String tn = change(pojo.getClu().get(i).getTname());
 			str = str + "public void set" + tn.replaceFirst(tn.substring(0, 1), tn.substring(0, 1).toUpperCase()) + "("
 					+ getType(pojo.getClu().get(i).getType()) + " " + tn + "){\n" + "this." + tn + "=" + tn + ";\n"
 					+ "}\n";
 		}
 		for (int i = 0; i < pojo.getClu().size(); i++) {
-			String tn = pojo.getClu().get(i).getTname();
+			String tn = change(pojo.getClu().get(i).getTname());
 			str = str + "public " + getType(pojo.getClu().get(i).getType()) + " get"
 					+ tn.replaceFirst(tn.substring(0, 1), tn.substring(0, 1).toUpperCase()) + "(){\n" + "return " + tn
 					+ ";" + "}\n";
@@ -297,5 +297,20 @@ public class PojoInsert {
 			break;
 		}
 		return x;
+	}
+
+	private static String change(String str) {
+		String re = "";
+		char[] xxxx = str.toCharArray();
+		for (int i = 0; i < xxxx.length; i++) {
+			if (95 == xxxx[i]) {
+				if (i < xxxx.length && xxxx[i + 1] > 96 && xxxx[i + 1] < 123) {
+					re = re + (char) (xxxx[i + 1] - 32);
+				}
+			} else {
+				re = re + xxxx[i];
+			}
+		}
+		return re;
 	}
 }

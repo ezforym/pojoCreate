@@ -19,6 +19,7 @@ public class JdbcUtil {
 		// System.out.println("==============>" +
 		// PojoInsert.class.getResource("").toString());
 		String x = PojoInsert.class.getResource("").toString();
+		System.out.println(x);
 		String[] sxxx = x.split("PojoCreate.jar");
 		String[] sx = sxxx[0].split("jar:file:");
 		// System.out.println(sx[1]);
