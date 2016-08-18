@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class PojoInsert {
 	public static boolean createFile(String destFileName) {
@@ -37,7 +39,8 @@ public class PojoInsert {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			System.out.println("创建单个文件" + destFileName + "失败！" + e.getMessage());
+			System.out
+					.println("创建单个文件" + destFileName + "失败！" + e.getMessage());
 			return false;
 		}
 	}
@@ -61,7 +64,8 @@ public class PojoInsert {
 		}
 	}
 
-	public static String createTempFile(String prefix, String suffix, String dirName) {
+	public static String createTempFile(String prefix, String suffix,
+			String dirName) {
 		File tempFile = null;
 		if (dirName == null) {
 			try {
@@ -158,17 +162,50 @@ public class PojoInsert {
 		// 创建文件
 		String fin = pojo.getTname();
 		if (func.equals("java")) {
-			fin = fin.replaceFirst(fin.substring(0, 1), fin.substring(0, 1).toUpperCase());
+			fin = fin.replaceFirst(fin.substring(0, 1), fin.substring(0, 1)
+					.toUpperCase());
 		}
-		String fileName = dirName + "/" + fin + "." + func;
-		System.out.println(PojoInsert.createFile(change(fileName)));
+		String fn = dirName + "/" + change(fin) + "." + "xml";
+		String fileName = dirName + "/" + change(fin) + "." + func;
+		System.out.println(PojoInsert.createFile(fileName));
 		String xxxxx = "";
+		String xxxxxx = "";
 		if (func.equals("php")) {
 			xxxxx = huoquString(pojo);
 		} else if (func.equals("java")) {
 			xxxxx = javahuoquString(pojo, pac);
+			xxxxxx = xmlhuoquString(pojo);
 		}
+		contentToTxt(fn, xxxxxx);
 		contentToTxt(fileName, xxxxx);
+	}
+
+	private static String xmlhuoquString(Pojo pojo) {
+		String str = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\n<!DOCTYPE mapper PUBLIC\n \"-//mybatis.org//DTD Mapper 3.0//EN\"\n    \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n\n";
+		String n = change(pojo.getTname().replaceFirst(
+				pojo.getTname().substring(0, 1),
+				pojo.getTname().substring(0, 1).toUpperCase()));
+		str = str
+				+ "<mapper namespace=\"com.dftc.dev.infrastructure.persistence.mybatis.Mybatis"
+				+ n + "Reponsitory\">\n" + "<resultMap id=\""
+				+ change(pojo.getTname())
+				+ "Wrap\" type=\"com.dftc.dev.domain.model.wrap." + n
+				+ "Wrap\">\n";
+		for (int i = 0; i < pojo.getClu().size(); i++) {
+			String type = "";
+			String xt = getType(pojo.getClu().get(i).getType());
+			if (xt.equals("Long") || xt.equals("Integer")) {
+				type = "java.lang." + xt;
+			} else {
+				type = xt;
+			}
+			str = str + "<result property=\""
+					+ change(pojo.getClu().get(i).getTname()) + "\" column=\""
+					+ pojo.getClu().get(i).getTname() + "\" javaType=\"" + type
+					+ "\" />\n";
+		}
+		str = str + "	</resultMap>\n" + "</mapper>";
+		return str;
 	}
 
 	private static String javahuoquString(Pojo pojo, String pac) {
@@ -177,8 +214,9 @@ public class PojoInsert {
 		int math1 = 0;
 		for (int i = 0; i < pojo.getClu().size(); i++) {
 			String x3 = pojo.getClu().get(i).getType();
-			if ((x3.equals("TIME") || x3.equals("DATE") || x3.equals("DATETIME") || x3.equals("TIMESTAMP")
-					|| x3.equals("YEAR")) && date1 == 0) {
+			if ((x3.equals("TIME") || x3.equals("DATE")
+					|| x3.equals("DATETIME") || x3.equals("TIMESTAMP") || x3
+						.equals("YEAR")) && date1 == 0) {
 				str = str + "import java.sql.*;\n";
 				date1 = 1;
 			}
@@ -187,43 +225,64 @@ public class PojoInsert {
 				math1 = 1;
 			}
 		}
-		str = str + "public class " + change(pojo.getTname().replaceFirst(pojo.getTname().substring(0, 1),
-				pojo.getTname().substring(0, 1).toUpperCase())) + "{\n";
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// 设置日期格式
+		str = str + "\n"
+				+ "/**\n * TODO\n *\n * @author wuyize\n *\n * @version"
+				+ " v1.0.0\n * @date " + df.format(new Date()) + "\n *\n */\n";
+		str = str
+				+ "public class "
+				+ change(pojo.getTname().replaceFirst(
+						pojo.getTname().substring(0, 1),
+						pojo.getTname().substring(0, 1).toUpperCase())) + "{\n";
 		for (int i = 0; i < pojo.getClu().size(); i++) {
-			str = str + "private " + getType(pojo.getClu().get(i).getType()) + " "
-					+ change(pojo.getClu().get(i).getTname()) + ";\n";
+			str = str + "private " + getType(pojo.getClu().get(i).getType())
+					+ " " + change(pojo.getClu().get(i).getTname()) + ";\n";
 		}
 		for (int i = 0; i < pojo.getClu().size(); i++) {
 			String tn = change(pojo.getClu().get(i).getTname());
-			str = str + "public void set" + tn.replaceFirst(tn.substring(0, 1), tn.substring(0, 1).toUpperCase()) + "("
-					+ getType(pojo.getClu().get(i).getType()) + " " + tn + "){\n" + "this." + tn + "=" + tn + ";\n"
+			str = str
+					+ "public void set"
+					+ tn.replaceFirst(tn.substring(0, 1), tn.substring(0, 1)
+							.toUpperCase()) + "("
+					+ getType(pojo.getClu().get(i).getType()) + " " + tn
+					+ "){\n" + "this." + tn + "=" + tn + ";\n" + "}\n";
+		}
+		for (int i = 0; i < pojo.getClu().size(); i++) {
+			String tn = change(pojo.getClu().get(i).getTname());
+			str = str
+					+ "public "
+					+ getType(pojo.getClu().get(i).getType())
+					+ " get"
+					+ tn.replaceFirst(tn.substring(0, 1), tn.substring(0, 1)
+							.toUpperCase()) + "(){\n" + "return " + tn + ";"
 					+ "}\n";
-		}
-		for (int i = 0; i < pojo.getClu().size(); i++) {
-			String tn = change(pojo.getClu().get(i).getTname());
-			str = str + "public " + getType(pojo.getClu().get(i).getType()) + " get"
-					+ tn.replaceFirst(tn.substring(0, 1), tn.substring(0, 1).toUpperCase()) + "(){\n" + "return " + tn
-					+ ";" + "}\n";
 		}
 		str = str + "}\n";
 		return str;
 	}
 
 	private static String huoquString(Pojo pojo) {
-		String str = "<?php\n class " + pojo.getTname().replaceFirst(pojo.getTname().substring(0, 1),
-				pojo.getTname().substring(0, 1).toUpperCase()) + "{\n";
+		String str = "<?php\n class "
+				+ pojo.getTname().replaceFirst(pojo.getTname().substring(0, 1),
+						pojo.getTname().substring(0, 1).toUpperCase()) + "{\n";
 		for (int i = 0; i < pojo.getClu().size(); i++) {
 			str = str + "var $" + pojo.getClu().get(i).getTname() + ";\n";
 		}
 		for (int i = 0; i < pojo.getClu().size(); i++) {
 			String tn = pojo.getClu().get(i).getTname();
-			str = str + "function set" + tn.replaceFirst(tn.substring(0, 1), tn.substring(0, 1).toUpperCase()) + "($"
-					+ tn + "){\n" + "$this->" + tn + "=$" + tn + ";\n" + "}\n";
+			str = str
+					+ "function set"
+					+ tn.replaceFirst(tn.substring(0, 1), tn.substring(0, 1)
+							.toUpperCase()) + "($" + tn + "){\n" + "$this->"
+					+ tn + "=$" + tn + ";\n" + "}\n";
 		}
 		for (int i = 0; i < pojo.getClu().size(); i++) {
 			String tn = pojo.getClu().get(i).getTname();
-			str = str + "function get" + tn.replaceFirst(tn.substring(0, 1), tn.substring(0, 1).toUpperCase()) + "(){\n"
-					+ "return $this->" + tn + ";" + "}\n";
+			str = str
+					+ "function get"
+					+ tn.replaceFirst(tn.substring(0, 1), tn.substring(0, 1)
+							.toUpperCase()) + "(){\n" + "return $this->" + tn
+					+ ";" + "}\n";
 		}
 		str = str + "}\n?>";
 		return str;
@@ -278,10 +337,10 @@ public class PojoInsert {
 			x = "boolean";
 			break;
 		case "INTEGER":
-			x = "Long";
+			x = "Integer";
 			break;
 		case "BIGINT":
-			x = "BigInteger";
+			x = "Long";
 			break;
 		case "VARCHAR":
 			x = "String";
@@ -306,6 +365,7 @@ public class PojoInsert {
 			if (95 == xxxx[i]) {
 				if (i < xxxx.length && xxxx[i + 1] > 96 && xxxx[i + 1] < 123) {
 					re = re + (char) (xxxx[i + 1] - 32);
+					i++;
 				}
 			} else {
 				re = re + xxxx[i];

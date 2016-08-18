@@ -1,1 +1,0 @@
-{"url":"jdbc:mysql://192.168.100.91:3306/zocoo","user": "wuyize","password": "psoxsk","func":"java","path":"E:/send","package":"com.wyz.pojo","pojo":["user","msg"]}
