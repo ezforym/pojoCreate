@@ -43,12 +43,14 @@ public class JdbcUtil {
 		String url = url2 + "?" + "user=" + user + "&password=" + password + "&useUnicode=true&characterEncoding=UTF8";
 		JSONArray ja = jsStr.getJSONArray("pojo");
 		String func = jsStr.getString("func");
+		String xml = jsStr.getString("xml");
 		for (int i = 0; i < ja.size(); i++) {
-			getdata(url, ja.get(i).toString(), func, path, pac);
+			getdata(url, ja.get(i).toString(), func, path, pac, xml);
 		}
 	}
 
-	private static void getdata(String url, String tname, String func, String path, String pac) throws SQLException {
+	private static void getdata(String url, String tname, String func, String path, String pac, String xml)
+			throws SQLException {
 		Connection conn = null;
 		try {
 			Class.forName("com.mysql.jdbc.Driver");// 动态加载mysql驱动
@@ -69,7 +71,7 @@ public class JdbcUtil {
 			}
 			pojo.setClu(list);
 			PojoInsert p = new PojoInsert();
-			p.sb(pojo, func, path, pac);
+			p.sb(pojo, func, path, pac, xml);
 			// rsmd.getColumnTypeName(1);
 			// rsmd.getColumnName(1);
 			// PreparedStatement mstmt = conn.prepareStatement(sql);
