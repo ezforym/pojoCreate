@@ -8,7 +8,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -52,12 +54,23 @@ public class JdbcUtil {
 	private static void getdata(String url, String tname, String func, String path, String pac, String xml)
 			throws SQLException {
 		Connection conn = null;
+		ResultSet rs = null;
+		ResultSet rsc = null;
 		try {
 			Class.forName("com.mysql.jdbc.Driver");// 动态加载mysql驱动
 			conn = DriverManager.getConnection(url);
 			Statement stmt = conn.createStatement();
+			Statement stmt1 = conn.createStatement();
 			String sql = "SELECT * FROM " + tname;
-			ResultSet rs = stmt.executeQuery(sql);// 得到查询结果,一个数据集
+			rs = stmt.executeQuery(sql);// 得到查询结果,一个数据集
+			Map<String, String> m = new HashMap<String, String>();
+			rsc = stmt1.executeQuery("show full columns from " + tname);
+			try {
+				while (rsc.next()) {
+					m.put(rsc.getString("Field"), rsc.getString("Comment"));
+				}
+			} catch (Exception e) {
+			}
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int numberOfColumns = rsmd.getColumnCount(); // 得到数据集的列数
 			Pojo pojo = new Pojo();
@@ -67,68 +80,15 @@ public class JdbcUtil {
 				Clu clu = new Clu();
 				clu.setTname(rsmd.getColumnName(j));
 				clu.setType(rsmd.getColumnTypeName(j));
+				try {
+					clu.setComment(m.get(rsmd.getColumnName(j)));
+				} catch (Exception e) {
+				}
 				list.add(clu);
 			}
 			pojo.setClu(list);
 			PojoInsert p = new PojoInsert();
 			p.sb(pojo, func, path, pac, xml);
-			// rsmd.getColumnTypeName(1);
-			// rsmd.getColumnName(1);
-			// PreparedStatement mstmt = conn.prepareStatement(sql);
-
-			// int type = -1;
-			// for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-			// String name = rsmd.getColumnName(i);
-			// type = rsmd.getColumnType(i);//返回列类型对应的整形数表示。package
-			// java.sql.Type类有各类型对应的整数表示。
-			//
-			// switch (type) {
-			// case Types.BIGINT:
-			// mstmt.setLong(i, rs.getLong(name));
-			// break;
-			// case Types.BOOLEAN:
-			// mstmt.setBoolean(i, rs.getBoolean(name));
-			// break;
-			// case Types.DATE:
-			// mstmt.setDate(i, rs.getDate(name));
-			// break;
-			// case Types.DOUBLE:
-			// mstmt.setDouble(i, rs.getDouble(name));
-			// break;
-			// case Types.FLOAT:
-			// mstmt.setFloat(i, rs.getFloat(name));
-			// break;
-			// case Types.INTEGER:
-			// mstmt.setInt(i, rs.getInt(name));
-			// break;
-			// case Types.SMALLINT:
-			// mstmt.setInt(i, rs.getInt(name));
-			// break;
-			// case Types.TIME:
-			// mstmt.setTime(i, rs.getTime(name));
-			// break;
-			// case Types.TIMESTAMP:
-			// mstmt.setTimestamp(i, rs.getTimestamp(name));
-			// break;
-			// case Types.TINYINT:
-			// mstmt.setShort(i, rs.getShort(name));
-			// break;
-			// case Types.VARCHAR:
-			// mstmt.setString(i, rs.getString(name));
-			// break;
-			// case Types.NCHAR:
-			// mstmt.setString(i, rs.getNString(name));
-			// break;
-			// case Types.NVARCHAR:
-			// mstmt.setString(i, rs.getNString(name));
-			// break;
-			// case Types.BIT:
-			// mstmt.setByte(i, rs.getByte(name));
-			// break;
-			// }
-			//
-
-			// System.out.println(numberOfColumns);
 		} catch (SQLException e) {
 			System.out.println("MySQL操作错误");
 			e.printStackTrace();
@@ -138,5 +98,4 @@ public class JdbcUtil {
 			conn.close();
 		}
 	}
-
 }

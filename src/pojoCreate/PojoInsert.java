@@ -226,8 +226,8 @@ public class PojoInsert {
 		str = str + "public class " + change(pojo.getTname().replaceFirst(pojo.getTname().substring(0, 1),
 				pojo.getTname().substring(0, 1).toUpperCase())) + "{\n";
 		for (int i = 0; i < pojo.getClu().size(); i++) {
-			str = str + "private " + getType(pojo.getClu().get(i).getType()) + " "
-					+ change(pojo.getClu().get(i).getTname()) + ";\n";
+			str = str + "// " + pojo.getClu().get(i).getComment() + "\n" + "private "
+					+ getType(pojo.getClu().get(i).getType()) + " " + change(pojo.getClu().get(i).getTname()) + ";\n";
 		}
 		for (int i = 0; i < pojo.getClu().size(); i++) {
 			String tn = change(pojo.getClu().get(i).getTname());
